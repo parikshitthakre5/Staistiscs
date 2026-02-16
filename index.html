@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app" data-theme="dark">
+        <aside class="sidebar">
+            <div class="logo">
+                <h1>Tasks</h1>
+            </div>
+            <div class="global-search-wrap">
+                <input type="text" id="globalSearch" placeholder="Search" class="global-search">
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-view="dashboard">
+                    <span>Overview</span>
+                    <span class="nav-badge" id="taskCount">0</span>
+                </button>
+                <button class="nav-item" data-view="tasks"><span>Tasks</span></button>
+                <button class="nav-item" data-view="notes"><span>Notes</span></button>
+                <button class="nav-item" data-view="timer"><span>Timer</span></button>
+                <button class="nav-item" data-view="habits"><span>Habits</span></button>
+                <button class="nav-item" data-view="statistics"><span>Stats</span></button>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="theme-toggle" id="themeToggle" title="Theme"><span class="theme-icon">◐</span></button>
+                <button class="btn-icon" id="shortcutsBtn" title="Shortcuts">?</button>
+                <button class="btn-icon small" id="exportDataBtn" title="Export">↓</button>
+                <label class="btn-icon small" title="Import"><input type="file" id="importDataInput" accept=".json" hidden>↑</label>
+                <div class="date-display" id="dateDisplay"></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <section class="view active" id="view-dashboard">
+                <header class="view-header">
+                    <h2>Overview</h2>
+                </header>
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <span class="stat-value" id="dashTotalTasks">0</span>
+                        <span class="stat-label">tasks</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="dashCompletedTasks">0</span>
+                        <span class="stat-label">done</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="dashNotesCount">0</span>
+                        <span class="stat-label">notes</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="dashStreak">0</span>
+                        <span class="stat-label">streak</span>
+                    </div>
+                </div>
+                <div class="dashboard-section">
+                    <h3>Due soon</h3>
+                    <div class="upcoming-tasks" id="upcomingTasks"></div>
+                </div>
+            </section>
+
+            <section class="view" id="view-tasks">
+                <header class="view-header">
+                    <h2>Tasks</h2>
+                </header>
+                <div class="tasks-toolbar">
+                    <div class="filter-group">
+                        <select id="taskFilter">
+                            <option value="all">All</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <select id="taskTagFilter">
+                            <option value="">All tags</option>
+                        </select>
+                        <select id="taskSort">
+                            <option value="order">Order</option>
+                            <option value="date">Date</option>
+                            <option value="priority">Priority</option>
+                            <option value="name">Name</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="addTaskBtn">Add task</button>
+                </div>
+                <div class="tasks-list" id="tasksList"></div>
+            </section>
+
+            <section class="view" id="view-notes">
+                <header class="view-header">
+                    <h2>Notes</h2>
+                </header>
+                <div class="notes-toolbar">
+                    <input type="text" id="notesSearch" placeholder="Search notes...">
+                    <button class="btn btn-primary" id="addNoteBtn">New note</button>
+                </div>
+                <div class="notes-grid" id="notesGrid"></div>
+            </section>
+
+            <section class="view" id="view-timer">
+                <header class="view-header">
+                    <h2>Timer</h2>
+                </header>
+                <div class="timer-container">
+                    <div class="timer-display">
+                        <span id="timerMinutes">25</span>:<span id="timerSeconds">00</span>
+                    </div>
+                    <div class="timer-mode">
+                        <button class="mode-btn active" data-mode="work">Work</button>
+                        <button class="mode-btn" data-mode="short">Short Break</button>
+                        <button class="mode-btn" data-mode="long">Long Break</button>
+                    </div>
+                    <div class="timer-controls">
+                        <button class="btn btn-large" id="timerStart">Start</button>
+                        <button class="btn btn-large btn-secondary" id="timerReset">Reset</button>
+                    </div>
+                    <div class="timer-sessions">
+                        <span>Today: <strong id="sessionsCount">0</strong></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="view" id="view-habits">
+                <header class="view-header">
+                    <h2>Habits</h2>
+                </header>
+                <div class="habits-toolbar">
+                    <button class="btn btn-primary" id="addHabitBtn">Add habit</button>
+                </div>
+                <div class="habits-calendar">
+                    <div class="calendar-header" id="habitsCalendarHeader"></div>
+                    <div class="habits-list" id="habitsList"></div>
+                </div>
+            </section>
+
+            <section class="view" id="view-statistics">
+                <header class="view-header">
+                    <h2>Stats</h2>
+                </header>
+                <div class="stats-grid">
+                    <div class="chart-card">
+                        <h3>Tasks done (7 days)</h3>
+                        <canvas id="chartTasks" width="400" height="200"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Timer sessions (7 days)</h3>
+                        <canvas id="chartPomodoro" width="400" height="200"></canvas>
+                    </div>
+                    <div class="chart-card full-width">
+                        <h3>Habits this month</h3>
+                        <div class="habits-chart-bars" id="habitsChartBars"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="taskModal">
+            <div class="modal-header">
+                <h3 id="taskModalTitle">Add task</h3>
+                <button class="modal-close" data-close>&times;</button>
+            </div>
+            <form id="taskForm">
+                <input type="hidden" id="taskId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="taskTitle" required placeholder="Task title">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="taskDescription" rows="3" placeholder="Notes"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Due Date</label>
+                        <input type="date" id="taskDueDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tags</label>
+                    <input type="text" id="taskTags" placeholder="work, urgent">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal" id="noteModal">
+            <div class="modal-header">
+                <h3 id="noteModalTitle">New note</h3>
+                <button class="modal-close" data-close>&times;</button>
+            </div>
+            <form id="noteForm">
+                <input type="hidden" id="noteId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="noteTitle" required placeholder="Note title">
+                </div>
+                <div class="form-group">
+                    <label>Content</label>
+                    <textarea id="noteContent" rows="6" placeholder="Write your note..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal" id="habitModal">
+            <div class="modal-header">
+                <h3 id="habitModalTitle">Add habit</h3>
+                <button class="modal-close" data-close>&times;</button>
+            </div>
+            <form id="habitForm">
+                <input type="hidden" id="habitId">
+                <div class="form-group">
+                    <label>Habit Name</label>
+                    <input type="text" id="habitName" required placeholder="Habit name">
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <div class="color-picker" id="habitColorPicker"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal" id="shortcutsModal">
+            <div class="modal-header">
+                <h3>Shortcuts</h3>
+                <button class="modal-close" data-close>&times;</button>
+            </div>
+            <div class="shortcuts-list">
+                <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>K</kbd> <span>Search</span></div>
+                <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>N</kbd> <span>New</span></div>
+                <div class="shortcut-row"><kbd>Esc</kbd> <span>Close</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="global-search-results" id="globalSearchResults"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
